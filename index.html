@@ -444,7 +444,7 @@ const tok=()=>token?Promise.resolve(token):signIn();
 async function call(base,path,opt={}){
   if(!base)throw new Error('Investments sheet not set up (add INV_SHEET_ID to config.js)');
   const r=await fetch(base+path,{...opt,headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'}});
-  if(r.status===401){token=null;L.removeItem('st_token');throw new Error('Session expired. Tap to reconnect.')}
+  if(r.status===401){token=null;L.removeItem('st_token');armSync();throw new Error('Session expired. Tap to reconnect.')}
   if(!r.ok){let m='Request failed';try{m=(await r.json()).error.message}catch(e){}throw new Error(m)}
   return r.json();
 }
@@ -541,7 +541,7 @@ istore={
 /* ---------- roles, sync, start ---------- */
 const DEFAULT_SYNC='Showing saved entries · tap to refresh';
 const stale={sav:false,inv:false},syncText={sav:'',inv:''};
-function updateSync(){const e=$('sync');if(!e)return;e.textContent=syncText[app]||DEFAULT_SYNC;e.classList.toggle('hide',!stale[app]);if(typeof fitLayout==='function')fitLayout()}
+function updateSync(){const e=$('sync');if(!e)return;e.textContent=syncText[app]||'';e.classList.toggle('hide',!(stale[app]&&syncText[app]));if(typeof fitLayout==='function')fitLayout()}
 function setStale(k,on,text){stale[k]=on;syncText[k]=on?(text||''):'';updateSync()}
 const invAllowed=()=>role==='owner'||(role==='viewer'&&VSI);
 function setBadges(){$('pSM').classList.toggle('on',role==='owner');$('pDM').classList.toggle('on',role==='viewer')}
@@ -560,7 +560,18 @@ async function manualSync(){
   try{if(!token)await signIn();await start()}
   catch(x){e.textContent='Could not refresh ('+(x&&x.message||'try again')+') · tap to retry'}
 }
-function reconnectBanner(){setStale('sav',true);if(invAllowed())setStale('inv',true);$('mode').textContent='Tap to reconnect';$('mode').className='tap';$('mode').onclick=async()=>{try{await signIn();await start()}catch(e){}}}
+let armed=false,signing=false;
+function autoSync(){
+  if(signing)return;signing=true;
+  Promise.race([signIn(),new Promise((_,r)=>setTimeout(()=>r(new Error('timeout')),8000))]).then(()=>start()).catch(()=>{armSync()}).finally(()=>{signing=false});
+}
+function armSync(){
+  if(armed)return;armed=true;
+  const h=()=>{if(token){off();return}off();autoSync()};
+  const off=()=>{armed=false;['click','touchend'].forEach(t=>document.removeEventListener(t,h,true))};
+  ['click','touchend'].forEach(t=>document.addEventListener(t,h,true));
+}
+function reconnectBanner(){autoSync()}
 async function loadInv(){
   if(!invAllowed()||!IAPI)return;
   try{await fetchInv()}catch(e){setStale('inv',true,errText(e,'Investments'))}
@@ -663,7 +674,7 @@ function init(){
   document.addEventListener('visibilitychange',()=>{
     if(document.hidden||sub===2)return;
     if(token&&role){fetchEntries().catch(e=>setStale('sav',true,errText(e)));loadInv()}
-    else if(email&&role){reconnectBanner();signIn().then(()=>start()).catch(()=>{})}
+    else if(email&&role){autoSync()}
   });
   if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js');
 }
