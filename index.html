@@ -167,17 +167,23 @@ input,select,.seg button{background:rgba(255,255,255,.07)}
 .toast{position:fixed;left:16px;right:16px;max-width:528px;margin:0 auto;bottom:calc(env(safe-area-inset-bottom,0px) + 14px);z-index:60;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 8px 8px 16px;border-radius:999px;border:2px solid rgba(212,178,109,.85);background:rgba(10,19,48,.82);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);color:#fff;font-weight:700;font-size:14px;box-shadow:0 6px 18px rgba(0,0,0,.5)}
 .toast.hide{display:none}
 .toast button{padding:7px 16px;border-radius:999px;border:0;background:linear-gradient(135deg,#e2c586,var(--gold));color:var(--cobalt);font-weight:900;font-size:14px}
-.lockov{position:fixed;inset:0;z-index:100;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;background:#070e26 radial-gradient(60% 40% at 15% 8%,rgba(31,166,224,.28),transparent 70%)}
-.lockov b{color:#fff;font-size:20px}
-.lockov .save{max-width:320px}
-html.lk .lockov{display:flex}
-html.hidamt .amt,html.hidamt .card .rt,html.hidamt .e>div:last-child,html.hidamt .sumbar i,html.hidamt .mv{filter:blur(7px);-webkit-filter:blur(7px)}
+.eyeb{position:absolute;right:16px;top:calc(env(safe-area-inset-top,0px) + 8px);width:27px;height:27px;border-radius:50%;border:1.5px solid rgba(212,178,109,.7);background:rgba(255,255,255,.07);display:flex;align-items:center;justify-content:center;padding:0;color:var(--gold2)}
+.eyeb svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.eyeb .off{display:none}
+@media (max-height:700px){.eyeb{width:22px;height:22px;top:calc(env(safe-area-inset-top,0px) + 1px)}.eyeb svg{width:13px;height:13px}}
+html.hidamt .eyeb{background:rgba(31,166,224,.35);color:#fff;box-shadow:0 0 5px rgba(31,166,224,.85)}
+html.hidamt .eyeb .on{display:none}html.hidamt .eyeb .off{display:block}
+html.hidamt .amt,html.hidamt .card .rt b,html.hidamt .card .rt small,html.hidamt .e>div:last-child span,html.hidamt .sumbar i,html.hidamt .mv{font-size:0!important;letter-spacing:0}
+html.hidamt .amt::after,html.hidamt .card .rt b::after,html.hidamt .e>div:last-child span::after,html.hidamt .sumbar i::after,html.hidamt .mv::after{content:"\2022\2022\2022\2022\2022";font-size:14px;letter-spacing:1px}
+html.hidamt .card .rt small::after{content:"\2022\2022\2022\2022";font-size:11px;letter-spacing:1px}
+html.hidamt .sumbar i::after{font-size:min(12.5px,3.2vw)}
 #cards{-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
 </style>
 </head>
 <body class="locked">
-<script>try{var d=document.documentElement;if(localStorage.getItem("fv_cred"))d.classList.add("lk");if(localStorage.getItem("fv_hide")==="1")d.classList.add("hidamt")}catch(e){}</script>
+<script>try{var d=document.documentElement;localStorage.removeItem("fv_cred");if(localStorage.getItem("fv_hide")==="1")d.classList.add("hidamt")}catch(e){}</script>
 <div class="top">
+<button class="eyeb" id="tb_e" onclick="toggleHide()" aria-label="Hide or show amounts"><svg class="on" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><svg class="off" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path d="M4 4l16 16"/></svg></button>
 <header><span class="pb" id="pSM">SM</span><h1>Family Vault</h1><span class="pb" id="pDM">DM</span></header>
 <div class="tabs" id="mt">
   <button id="m1" class="on" onclick="setApp('sav')">Savings</button>
@@ -208,10 +214,7 @@ html.hidamt .amt,html.hidamt .card .rt,html.hidamt .e>div:last-child,html.hidamt
       <button id="tb_s" onclick="openSearch()" aria-label="Search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></button>
       <button id="tb_f" onclick="openFilter()" aria-label="Filter by date"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></button>
       <button id="tb_m" onclick="openSummary()" aria-label="Monthly summary"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V10M12 20V4M19 20v-7"/></svg></button>
-      <button id="tb_p" class="hide" onclick="openProject()" aria-label="Add project"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
       <button id="tb_x" onclick="openExport()" aria-label="Export"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg></button>
-      <button id="tb_l" class="hide" onclick="toggleLock()" aria-label="Face ID lock"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="3"/><path d="M8 11V8a4 4 0 018 0v3"/></svg></button>
-      <button id="tb_e" onclick="toggleHide()" aria-label="Hide amounts"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
     </div>
   </div>
   <div id="hist"><img id="fl" class="logo mono" src="logo-sm.png" alt="Family Vault"><div id="hlist"></div></div>
@@ -351,11 +354,6 @@ html.hidamt .amt,html.hidamt .card .rt,html.hidamt .e>div:last-child,html.hidamt
 
 <div id="toast" class="toast hide"><span id="toast_t"></span><button id="toast_u" onclick="doUndo()">Undo</button></div>
 
-<div id="lockov" class="lockov">
-  <img class="logo big" src="logo.png" alt="Family Vault">
-  <b>Family Vault is locked</b>
-  <button class="save" onclick="unlock()">Unlock with Face ID</button>
-  <div class="msg" id="lk_msg"></div>
 </div>
 
 <script src="config.js"></script>
@@ -521,11 +519,7 @@ const savList=()=>entries.filter(e=>(!filter||e.section===filter)&&(!dFrom||e.da
 function updateTools(){
   const sav=app==='sav';
   ['tb_s','tb_f','tb_m'].forEach(id=>$(id).classList.toggle('hide',!sav));
-  $('tb_p').classList.toggle('hide',!(app==='inv'&&role==='owner'&&IAPI));
-  $('tb_l').classList.toggle('hide',!window.PublicKeyCredential);
-  $('tb_l').classList.toggle('on',lockOn());
   $('tb_f').classList.toggle('on',dActive());
-  $('tb_e').classList.toggle('on',document.documentElement.classList.contains('hidamt'));
 }
 function openSearch(){$('hrow').classList.add('searching');$('sq').classList.remove('hide');$('sqx').classList.remove('hide');$('sq').focus()}
 function closeSearch(){q='';$('sq').value='';$('sq').classList.add('hide');$('sqx').classList.add('hide');$('hrow').classList.remove('searching');$('sq').blur();render()}
@@ -613,38 +607,8 @@ async function doExport(k){
   }catch(e){xmsg('Export failed: '+(e&&e.message||'try again'),'err')}
 }
 
-/* ---------- hide amounts, Face ID lock ---------- */
+/* ---------- hide amounts ---------- */
 function toggleHide(){const h=document.documentElement.classList.toggle('hidamt');try{L.setItem('fv_hide',h?'1':'0')}catch(e){}updateTools()}
-const b64=a=>btoa(String.fromCharCode(...new Uint8Array(a)));
-const unb64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
-const lockOn=()=>{try{return !!L.getItem('fv_cred')}catch(e){return false}};
-async function enableLock(){
-  if(!window.PublicKeyCredential||!(await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()))throw new Error('Face ID / passcode is not available here');
-  const cred=await navigator.credentials.create({publicKey:{challenge:crypto.getRandomValues(new Uint8Array(32)),rp:{name:'Family Vault',id:location.hostname},user:{id:crypto.getRandomValues(new Uint8Array(16)),name:email||'family-vault',displayName:'Family Vault'},pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required',residentKey:'discouraged'},timeout:60000,attestation:'none'}});
-  L.setItem('fv_cred',b64(cred.rawId));
-}
-async function verifyLock(){
-  await navigator.credentials.get({publicKey:{challenge:crypto.getRandomValues(new Uint8Array(32)),rpId:location.hostname,allowCredentials:[{type:'public-key',id:unb64(L.getItem('fv_cred'))}],userVerification:'required',timeout:60000}});
-}
-async function toggleLock(){
-  try{
-    if(lockOn()){await verifyLock();L.removeItem('fv_cred');showToast('Face ID lock off')}
-    else{await enableLock();showToast('Face ID lock on')}
-  }catch(e){showToast('Lock not changed: '+((e&&e.name==='NotAllowedError')?'cancelled':(e&&e.message)||'try again'))}
-  updateTools();
-}
-let unlocking=false;
-async function unlock(){
-  if(unlocking)return;unlocking=true;$('lk_msg').textContent='';
-  try{await verifyLock();document.documentElement.classList.remove('lk')}
-  catch(e){$('lk_msg').textContent=(e&&e.name==='NotAllowedError')?'Tap Unlock to try again':'Could not unlock: '+((e&&e.message)||'try again');$('lk_msg').className='msg err'}
-  unlocking=false;
-}
-let hiddenAt=0;
-document.addEventListener('visibilitychange',()=>{
-  if(document.hidden){hiddenAt=Date.now();if(lockOn())document.documentElement.classList.add('lk')}
-  else if(lockOn()&&document.documentElement.classList.contains('lk')){setTimeout(unlock,250)}
-});
 
 /* ---------- undo toast ---------- */
 let toastTimer=null,undoFn=null;
@@ -657,6 +621,7 @@ async function doUndo(){
 }
 
 /* ---------- new investment project ---------- */
+function onProjPick(){const el=$('i_proj');if(el.value==='__new__'){el.value='';openProject()}}
 function openProject(){if(role!=='owner')return;['p_name','p_label','p_share'].forEach(i=>$(i).value='');$('p_msg').textContent='';openSheet('sheetP')}
 async function saveProject(){
   const pm=(t,c)=>{$('p_msg').textContent=t;$('p_msg').className='msg '+(c||'')};
@@ -669,7 +634,7 @@ async function saveProject(){
   try{
     await tok();
     await iapi('/values/'+enc(STAB+'!A:C')+':append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS',{method:'POST',body:JSON.stringify({values:[[full,share,nowStamp()]]})});
-    await fetchInv();closeSheet('sheetP');showToast('Project added');
+    await fetchInv();closeSheet('sheetP');showToast('Project added');try{$('i_proj').value=full}catch(e){}
   }catch(e){pm('Could not save: '+((e&&e.message)||'try again'),'err')}
   $('p_save').disabled=false;
 }
@@ -683,6 +648,7 @@ function fillProj(){
   [['i_proj','Choose project'],['ie_proj','Choose project'],['i_src','Choose project'],['ie_src','Choose project']].forEach(([id,ph])=>{
     const el=$(id),v=el.value;el.innerHTML='';el.add(new Option(ph,''));
     iproj.forEach(p=>el.add(new Option(shortName(p.name),p.name)));
+    if(id==='i_proj'&&role==='owner'&&IAPI)el.add(new Option('+ New Project','__new__'));
     if([...el.options].some(o=>o.value===v))el.value=v;
   });
 }
@@ -877,7 +843,7 @@ function autoSync(){
 }
 function armSync(){
   if(armed)return;armed=true;
-  const h=()=>{if(document.documentElement.classList.contains('lk'))return;if(token){off();return}off();autoSync()};
+  const h=()=>{if(token){off();return}off();autoSync()};
   const off=()=>{armed=false;['click','touchend'].forEach(t=>document.removeEventListener(t,h,true))};
   ['click','touchend'].forEach(t=>document.addEventListener(t,h,true));
 }
@@ -978,10 +944,10 @@ window.addEventListener('load',()=>setTimeout(fitLayout,100));
 ['fl'].forEach(i=>{const e=document.getElementById(i);if(e)e.addEventListener('load',fitLayout)});
 
 function init(){
+  $('i_proj').addEventListener('change',onProjPick);
   $('sq').addEventListener('input',e=>{q=e.target.value;render()});
   $('sq').addEventListener('keydown',e=>{if(e.key==='Enter')e.target.blur()});
   updateTools();
-  if(lockOn()&&document.documentElement.classList.contains('lk'))setTimeout(unlock,400);
   SECTIONS.forEach(s=>{$('section').add(new Option(s,s));$('e_section').add(new Option(s,s))});
   buildSeg('ntype',setIType);buildSeg('etype',setIEType);setIType('Investment');setIEType('Investment');
   fillProj();
