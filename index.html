@@ -351,13 +351,13 @@ function renderInv(){
     $('ht').textContent='';$('hlist').innerHTML='';ifilter=null;fitLayout();return;
   }
   const g=aggregate();
-  $('s_inv').textContent='A$'+fm(g.ti);$('s_profit').textContent='A$'+fm(g.tp);
-  $('s_share').textContent='A$'+fm(iproj.reduce((t,p)=>t+(Number(p.share)||0),0));
+  {const sa=ifilter&&g.m[ifilter];$('s_inv').textContent='A$'+fm(sa?sa.inv:g.ti);$('s_profit').textContent='A$'+fm(sa?sa.profit:g.tp)}
+  {const sp=iproj.find(p=>p.name===ifilter);$('s_share').textContent='A$'+fm(sp?(Number(sp.share)||0):iproj.reduce((t,p)=>t+(Number(p.share)||0),0))}
   $('cards').innerHTML=iproj.map((p,i)=>{const a=g.m[p.name]||{inv:0,profit:0};
       return `<button class="card p ${PCOL[i%PCOL.length]} ${ifilter===p.name?'sel':''}" onclick="toggleP(${i})"><span class="cn"><b>${esc(shortName(p.name))}</b><small>${esc(bracket(p.name)||('Share A$'+fm(p.share)))}</small></span><span class="rt"><b>A$${fm(a.inv)}</b>${a.profit?`<small>Profit A$${fm(a.profit)}</small>`:''}</span></button>`}).join('');
   if(!ifilter){$('ht').textContent='Tap a project to see its history';$('hlist').innerHTML='';fitLayout();return}
   const pi=iproj.findIndex(p=>p.name===ifilter),p=iproj[pi]||{share:0};
-  $('ht').textContent=shortName(ifilter)+' · share A$'+fm(p.share)+(role==='owner'?' · tap to edit':'');
+  $('ht').textContent=shortName(ifilter)+(role==='owner'?' · tap to edit':'');
   const cls=PCOL[(pi<0?0:pi)%PCOL.length];
   const list=ients.filter(e=>e.section===ifilter).sort((a,c)=>c.date.localeCompare(a.date)||(c.ts||0)-(a.ts||0));
   $('hlist').innerHTML=list.length?list.map(e=>{
