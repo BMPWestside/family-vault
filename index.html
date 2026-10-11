@@ -983,6 +983,7 @@ function applyRole(){
   $('mode').className='';$('mode').onclick=null;
   $('mode').textContent=role==='owner'?'':'View only';
   $('t2').classList.toggle('hide',role!=='owner');
+  $('st').classList.toggle('hide',role!=='owner');
   $('m2').classList.toggle('hide',!invAllowed());
   if(!invAllowed()&&app==='inv')setApp('sav');
   if(role!=='owner'&&sub===2)tab(1);
