@@ -133,9 +133,50 @@ input,select,.seg button{background:rgba(255,255,255,.07)}
 .card.sel{box-shadow:0 0 0 4px var(--gold),0 0 6px 4px rgba(212,178,109,.5)}
 .card.gold.sel{box-shadow:0 0 0 4px var(--gold),0 0 6px 4px rgba(232,184,74,.5)}
 .save{box-shadow:0 0 6px rgba(212,178,109,.5)}
+
+/* ---------- tools, sheets, toast, lock ---------- */
+#hrow{display:flex;align-items:center;gap:6px;margin:8px 4px 6px}
+#hrow h3{margin:0;flex:1;min-width:0}
+.tb{display:flex;gap:3px;flex:none}
+.tb button,.tbx{width:27px;height:27px;border-radius:50%;border:1.5px solid rgba(212,178,109,.7);background:rgba(255,255,255,.07);display:flex;align-items:center;justify-content:center;padding:0;color:var(--gold2);flex:none;font-size:20px;line-height:1}
+.tb button svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.tb button.on{background:rgba(31,166,224,.35);color:#fff;box-shadow:0 0 5px rgba(31,166,224,.85)}
+.tb button.hide,.tbx.hide{display:none}
+#sq{flex:1;height:30px;border-radius:999px;padding:0 12px;font-size:15px}
+#hrow.searching h3,#hrow.searching .tb{display:none}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 4px}
+.chips button{padding:7px 12px;border-radius:999px;border:1.5px solid rgba(212,178,109,.7);background:rgba(255,255,255,.07);color:var(--ink);font-size:13px;font-weight:700}
+.chips button.on{background:rgba(31,166,224,.4);box-shadow:0 0 5px rgba(31,166,224,.85)}
+.mnav{display:flex;align-items:center;justify-content:space-between;margin:4px 0 8px}
+.mnav b{color:#fff;font-size:17px}
+.mnav button{width:36px;height:36px;border-radius:50%;border:1.5px solid rgba(212,178,109,.7);background:rgba(255,255,255,.07);color:var(--gold2);font-size:24px;line-height:1;padding:0}
+.mnav button:disabled{opacity:.3}
+.mtot{display:flex;gap:6px;margin-bottom:8px}
+.mtot div{flex:1;text-align:center;padding:6px 2px;border:1.5px solid rgba(212,178,109,.7);border-radius:14px;background:rgba(255,255,255,.06);min-width:0}
+.mtot small{display:block;font-size:10px;font-weight:800;text-transform:uppercase;color:var(--muted)}
+.mtot b{font-size:13px;font-variant-numeric:tabular-nums}
+.mrow{display:grid;grid-template-columns:1.15fr 1fr 1fr 1fr;gap:4px;align-items:center;padding:6px 8px;font-size:12.5px;font-variant-numeric:tabular-nums}
+.mrow.mh{font-size:10px;font-weight:800;text-transform:uppercase;color:var(--muted)}
+.mrow span:not(:first-child){text-align:right}
+.mrow+.mrow:not(.mh){border-top:1px solid rgba(212,178,109,.25)}
+.mrow .fn{font-weight:800}
+.c-gold{color:#ffe08a}.c-savings{color:#a6f2b0}.c-emergency{color:#ffb3b3}.c-travel{color:#b3d6ff}
+.pos{color:var(--pos)}.neg{color:var(--neg)}
+.mbest{margin:8px 4px 0;font-size:13px;color:var(--muted);text-align:center}
+#x_btns .btn2{margin-top:8px}
+.toast{position:fixed;left:16px;right:16px;max-width:528px;margin:0 auto;bottom:calc(env(safe-area-inset-bottom,0px) + 14px);z-index:60;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 8px 8px 16px;border-radius:999px;border:2px solid rgba(212,178,109,.85);background:rgba(10,19,48,.82);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);color:#fff;font-weight:700;font-size:14px;box-shadow:0 6px 18px rgba(0,0,0,.5)}
+.toast.hide{display:none}
+.toast button{padding:7px 16px;border-radius:999px;border:0;background:linear-gradient(135deg,#e2c586,var(--gold));color:var(--cobalt);font-weight:900;font-size:14px}
+.lockov{position:fixed;inset:0;z-index:100;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;background:#070e26 radial-gradient(60% 40% at 15% 8%,rgba(31,166,224,.28),transparent 70%)}
+.lockov b{color:#fff;font-size:20px}
+.lockov .save{max-width:320px}
+html.lk .lockov{display:flex}
+html.hidamt .amt,html.hidamt .card .rt,html.hidamt .e>div:last-child,html.hidamt .sumbar i,html.hidamt .mv{filter:blur(7px);-webkit-filter:blur(7px)}
+#cards{-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
 </style>
 </head>
 <body class="locked">
+<script>try{var d=document.documentElement;if(localStorage.getItem("fv_cred"))d.classList.add("lk");if(localStorage.getItem("fv_hide")==="1")d.classList.add("hidamt")}catch(e){}</script>
 <div class="top">
 <header><span class="pb" id="pSM">SM</span><h1>Family Vault</h1><span class="pb" id="pDM">DM</span></header>
 <div class="tabs" id="mt">
@@ -159,7 +200,20 @@ input,select,.seg button{background:rgba(255,255,255,.07)}
 <div id="funds">
   <div id="sync" class="sync hide" onclick="manualSync()">Showing saved entries · tap to refresh</div>
   <div id="cards"></div>
-  <h3 id="ht">Recent entries</h3>
+  <div id="hrow">
+    <h3 id="ht">Recent entries</h3>
+    <input id="sq" class="hide" type="search" placeholder="Search entries" autocomplete="off" enterkeyhint="search">
+    <button id="sqx" class="tbx hide" onclick="closeSearch()" aria-label="Close search">&times;</button>
+    <div class="tb" id="tb">
+      <button id="tb_s" onclick="openSearch()" aria-label="Search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></button>
+      <button id="tb_f" onclick="openFilter()" aria-label="Filter by date"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></button>
+      <button id="tb_m" onclick="openSummary()" aria-label="Monthly summary"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V10M12 20V4M19 20v-7"/></svg></button>
+      <button id="tb_p" class="hide" onclick="openProject()" aria-label="Add project"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+      <button id="tb_x" onclick="openExport()" aria-label="Export"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg></button>
+      <button id="tb_l" class="hide" onclick="toggleLock()" aria-label="Face ID lock"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="3"/><path d="M8 11V8a4 4 0 018 0v3"/></svg></button>
+      <button id="tb_e" onclick="toggleHide()" aria-label="Hide amounts"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+    </div>
+  </div>
   <div id="hist"><img id="fl" class="logo mono" src="logo-sm.png" alt="Family Vault"><div id="hlist"></div></div>
 </div>
 
@@ -243,6 +297,67 @@ input,select,.seg button{background:rgba(255,255,255,.07)}
   </div>
 </div>
 
+
+<div id="sheetF" class="sheet hide">
+  <div class="sheet-bg" onclick="closeSheet('sheetF')"></div>
+  <div class="panel sheet-box">
+    <div class="ph"><b>Filter by date</b><span></span></div>
+    <div class="chips" id="fchips"></div>
+    <div class="row">
+      <div><label>From</label><input id="f_from" type="date"></div>
+      <div><label>To</label><input id="f_to" type="date"></div>
+    </div>
+    <button class="save" onclick="applyFilter()">Apply</button>
+    <button class="btn2" onclick="clearFilter()">Clear filter</button>
+  </div>
+</div>
+
+<div id="sheetM" class="sheet hide">
+  <div class="sheet-bg" onclick="closeSheet('sheetM')"></div>
+  <div class="panel sheet-box">
+    <div class="ph"><b>Monthly summary</b><span></span></div>
+    <div class="mnav"><button onclick="monthStep(-1)" aria-label="Previous month">&lsaquo;</button><b id="m_lbl"></b><button id="m_next" onclick="monthStep(1)" aria-label="Next month">&rsaquo;</button></div>
+    <div class="mtot" id="m_tot"></div>
+    <div id="m_rows"></div>
+    <div class="mbest" id="m_best"></div>
+    <button class="btn2" onclick="closeSheet('sheetM')">Close</button>
+  </div>
+</div>
+
+<div id="sheetX" class="sheet hide">
+  <div class="sheet-bg" onclick="closeSheet('sheetX')"></div>
+  <div class="panel sheet-box">
+    <div class="ph"><b>Export</b><span></span></div>
+    <div id="x_btns"></div>
+    <div class="msg" id="x_msg"></div>
+    <button class="btn2" onclick="closeSheet('sheetX')">Close</button>
+  </div>
+</div>
+
+<div id="sheetP" class="sheet hide">
+  <div class="sheet-bg" onclick="closeSheet('sheetP')"></div>
+  <div class="panel sheet-box">
+    <div class="ph"><b>New project</b><span></span></div>
+    <label>Project name</label><input id="p_name" placeholder="e.g. 12 Smith St Dalby" maxlength="80">
+    <div class="row">
+      <div><label>Label (optional)</label><input id="p_label" placeholder="e.g. Land Project" maxlength="40"></div>
+      <div><label>Share value (AUD)</label><input id="p_share" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00"></div>
+    </div>
+    <button class="save" id="p_save" onclick="saveProject()">Add project</button>
+    <button class="btn2" onclick="closeSheet('sheetP')">Cancel</button>
+    <div class="msg" id="p_msg"></div>
+  </div>
+</div>
+
+<div id="toast" class="toast hide"><span id="toast_t"></span><button id="toast_u" onclick="doUndo()">Undo</button></div>
+
+<div id="lockov" class="lockov">
+  <img class="logo big" src="logo.png" alt="Family Vault">
+  <b>Family Vault is locked</b>
+  <button class="save" onclick="unlock()">Unlock with Face ID</button>
+  <div class="msg" id="lk_msg"></div>
+</div>
+
 <script src="config.js"></script>
 <script>
 const SECTIONS=['Gold','Savings','Emergency','Travel'];
@@ -273,7 +388,7 @@ function tab(n){
 function setApp(a){
   app=a;
   $('m1').classList.toggle('on',a==='sav');$('m2').classList.toggle('on',a==='inv');
-  $('t1').textContent=a==='sav'?'Stack':'Build';$('sb').classList.toggle('hide',a!=='inv');
+  $('t1').textContent=a==='sav'?'Stack':'Build';if(!$('sq').classList.contains('hide'))closeSearch();updateTools();$('sb').classList.toggle('hide',a!=='inv');
   updateSync();render();tab(1);
 }
 function setType(t){type=t;$('bi').className=t==='Income'?'on':'';$('bx').className=t==='Expense'?'on x':''}
@@ -284,11 +399,11 @@ function render(){app==='sav'?renderSav():renderInv()}
 function renderSav(){
   const b=balances();
   $('cards').innerHTML=SECTIONS.map(s=>`<button class="card ${s.toLowerCase()} ${filter===s?'sel':''}" onclick="toggle('${s}')"><span>${s}</span><span class="amt">${money(b[s])}</span></button>`).join('');
-  const list=entries.filter(e=>!filter||e.section===filter).sort((a,c)=>c.date.localeCompare(a.date)||(c.ts||0)-(a.ts||0));
+  const list=savList();
   $('ht').style.display='';
-  if(!filter){$('ht').textContent='Tap a fund to see its history';$('hlist').innerHTML='';fitLayout();return}
-  $('ht').textContent=filter+' history'+(role==='owner'?' · tap an entry to edit':'');
-  $('hlist').innerHTML=list.length?list.map(e=>`<div class="e ${e.section.toLowerCase()}"${role==='owner'?` onclick="openEdit('${e.id}')" style="cursor:pointer"`:''}><div><span class="t1">${e.section}${e.desc?' · '+esc(e.desc):''}</span><small>${fdate(e.date)}</small></div><div><span class="${e.type==='Income'?'inc':'exp'}">${e.type==='Income'?'+':'−'}${e.amount.toFixed(2)}</span></div></div>`).join(''):'<div class="empty">No entries for this fund yet.</div>';
+  if(!savMode()){$('ht').textContent='Tap a fund for history';$('hlist').innerHTML='';fitLayout();return}
+  $('ht').textContent=(filter&&!q&&!dActive())?filter+' history'+(role==='owner'?' · tap to edit':''):(filter||'All funds')+' · '+list.length+(list.length===1?' entry':' entries')+(dActive()?' · '+dateLabel():'');
+  $('hlist').innerHTML=list.length?list.map(e=>`<div class="e ${e.section.toLowerCase()}"${role==='owner'?` onclick="openEdit('${e.id}')" style="cursor:pointer"`:''}><div><span class="t1">${e.section}${e.desc?' · '+esc(e.desc):''}</span><small>${fdate(e.date)}</small></div><div><span class="${e.type==='Income'?'inc':'exp'}">${e.type==='Income'?'+':'−'}${e.amount.toFixed(2)}</span></div></div>`).join(''):'<div class="empty">'+((q||dActive())?'No matching entries.':'No entries for this fund yet.')+'</div>';
   fitLayout();
 }
 function toggle(s){filter=filter===s?null:s;render();$('hist').scrollTop=0}
@@ -302,7 +417,8 @@ function save(){
   const bal=balances()[section];
   if(type==='Expense'&&amount>bal&&!confirm(section+' only has '+money(bal)+'. Save anyway?'))return;
   $('save').disabled=true;msg('Saving…');
-  Promise.resolve(store.add({section,type,amount,date,person:'',desc:$('desc').value.trim()})).then(()=>{
+  Promise.resolve(store.add({section,type,amount,date,person:'',desc:$('desc').value.trim()})).then(nid=>{
+    showToast('Entry added',nid?()=>store.del(nid):null);
     $('amount').value='';$('desc').value='';$('section').value='';$('save').disabled=false;msg('Saved ✓','ok');
     setTimeout(()=>{msg('');tab(1)},500);
   }).catch(e=>{$('save').disabled=false;msg('Could not save: '+(e&&e.message||'try again'),'err')});
@@ -324,13 +440,15 @@ function saveEdit(){
   if(!(amount>0))return emsg('Enter an amount above 0','err');
   if(!date)return emsg('Pick a date','err');
   $('e_save').disabled=true;emsg('Saving…');
+  const oid=editId,o0=entries.find(x=>x.id===oid);
   Promise.resolve(store.edit(editId,{section,type:etypeS,amount,date,desc:$('e_desc').value.trim()}))
-    .then(()=>{$('e_save').disabled=false;closeEdit()})
+    .then(()=>{$('e_save').disabled=false;closeEdit();if(o0)showToast('Entry updated',()=>store.edit(oid,{section:o0.section,type:o0.type,amount:o0.amount,date:o0.date,desc:o0.desc}))})
     .catch(e=>{$('e_save').disabled=false;emsg('Could not save: '+(e&&e.message||'try again'),'err')});
 }
 function delEdit(){
   if(!confirm('Delete this entry?'))return;
-  Promise.resolve(store.del(editId)).then(closeEdit).catch(e=>emsg('Could not delete: '+(e&&e.message||'try again'),'err'));
+  const o0=entries.find(x=>x.id===editId);
+  Promise.resolve(store.del(editId)).then(()=>{closeEdit();if(o0)showToast('Entry deleted',()=>store.add({section:o0.section,type:o0.type,amount:o0.amount,date:o0.date,person:o0.person,desc:o0.desc}))}).catch(e=>emsg('Could not delete: '+(e&&e.message||'try again'),'err'));
 }
 
 /* ---------- investments (view) ---------- */
@@ -350,12 +468,13 @@ function renderInv(){
     $('cards').innerHTML='<div class="empty">Investments sheet not set up yet.<br>Add INV_SHEET_ID to config.js</div>';
     $('ht').textContent='';$('hlist').innerHTML='';ifilter=null;fitLayout();return;
   }
-  const g=aggregate();
+  const g=aggregate();const cst=$('cards').scrollTop;
   {const sa=ifilter&&g.m[ifilter];$('s_inv').textContent='A$'+fm(sa?sa.inv:g.ti);$('s_profit').textContent='A$'+fm(sa?sa.profit:g.tp)}
   {const sp=iproj.find(p=>p.name===ifilter);$('s_share').textContent='A$'+fm(sp?(Number(sp.share)||0):iproj.reduce((t,p)=>t+(Number(p.share)||0),0))}
   $('cards').innerHTML=iproj.map((p,i)=>{const a=g.m[p.name]||{inv:0,profit:0};
       return `<button class="card p ${PCOL[i%PCOL.length]} ${ifilter===p.name?'sel':''}" onclick="toggleP(${i})"><span class="cn"><b>${esc(shortName(p.name))}</b><small>${esc(bracket(p.name)||('Share A$'+fm(p.share)))}</small></span><span class="rt"><b>A$${fm(a.inv)}</b>${a.profit?`<small>Profit A$${fm(a.profit)}</small>`:''}</span></button>`}).join('');
-  if(!ifilter){$('ht').textContent='Tap a project to see its history';$('hlist').innerHTML='';fitLayout();return}
+  $('cards').scrollTop=cst;
+  if(!ifilter){$('ht').textContent='Tap a project for history';$('hlist').innerHTML='';fitLayout();return}
   const pi=iproj.findIndex(p=>p.name===ifilter),p=iproj[pi]||{share:0};
   $('ht').textContent=shortName(ifilter)+(role==='owner'?' · tap to edit':'');
   const cls=PCOL[(pi<0?0:pi)%PCOL.length];
@@ -367,6 +486,193 @@ function renderInv(){
   fitLayout();
 }
 function toggleP(i){const n=iproj[i]&&iproj[i].name;ifilter=ifilter===n?null:n;renderInv();$('hist').scrollTop=0}
+
+
+/* ---------- tools: search, date filter, monthly summary ---------- */
+let q='',dFrom='',dTo='',dPreset='';
+const dActive=()=>!!(dFrom||dTo);
+const pad2=n=>String(n).padStart(2,'0');
+const isoD=(y,m,d)=>y+'-'+pad2(m)+'-'+pad2(d);
+const dim=(y,m)=>new Date(y,m,0).getDate();
+const shortD=s=>{const[y,m,d]=String(s).split('-').map(Number);return y?new Date(y,m-1,d).toLocaleDateString('en-AU',{day:'numeric',month:'short'}):''};
+const PRESETS=[['month','This month'],['last','Last month'],['3m','Last 3 months'],['year','This year'],['all','All time']];
+function presetRange(k){
+  const n=new Date(),y=n.getFullYear(),m=n.getMonth()+1;
+  if(k==='month')return[isoD(y,m,1),isoD(y,m,dim(y,m))];
+  if(k==='last'){const py=m===1?y-1:y,pm=m===1?12:m-1;return[isoD(py,pm,1),isoD(py,pm,dim(py,pm))]}
+  if(k==='3m'){let py=y,pm=m-2;if(pm<1){pm+=12;py--}return[isoD(py,pm,1),isoD(y,m,dim(y,m))]}
+  if(k==='year')return[isoD(y,1,1),isoD(y,12,31)];
+  return['',''];
+}
+function dateLabel(){
+  const p=PRESETS.find(x=>x[0]===dPreset);if(p&&dPreset!=='all')return p[1];
+  if(dFrom&&dTo)return shortD(dFrom)+' – '+shortD(dTo);
+  if(dFrom)return 'from '+shortD(dFrom);
+  if(dTo)return 'to '+shortD(dTo);
+  return '';
+}
+function matchQ(e){
+  const t=q.toLowerCase().trim();if(!t)return true;
+  const hay=[e.section,e.desc||'',e.comments||'',e.type,e.amount.toFixed(2),String(e.amount),e.date,fdate(e.date)].join(' ').toLowerCase();
+  return t.split(/\s+/).every(w=>hay.includes(w));
+}
+const savMode=()=>!!(filter||q||dActive());
+const savList=()=>entries.filter(e=>(!filter||e.section===filter)&&(!dFrom||e.date>=dFrom)&&(!dTo||e.date<=dTo)&&matchQ(e)).sort((a,c)=>c.date.localeCompare(a.date)||(c.ts||0)-(a.ts||0));
+function updateTools(){
+  const sav=app==='sav';
+  ['tb_s','tb_f','tb_m'].forEach(id=>$(id).classList.toggle('hide',!sav));
+  $('tb_p').classList.toggle('hide',!(app==='inv'&&role==='owner'&&IAPI));
+  $('tb_l').classList.toggle('hide',!window.PublicKeyCredential);
+  $('tb_l').classList.toggle('on',lockOn());
+  $('tb_f').classList.toggle('on',dActive());
+  $('tb_e').classList.toggle('on',document.documentElement.classList.contains('hidamt'));
+}
+function openSearch(){$('hrow').classList.add('searching');$('sq').classList.remove('hide');$('sqx').classList.remove('hide');$('sq').focus()}
+function closeSearch(){q='';$('sq').value='';$('sq').classList.add('hide');$('sqx').classList.add('hide');$('hrow').classList.remove('searching');$('sq').blur();render()}
+function openSheet(id){$(id).classList.remove('hide')}
+function closeSheet(id){$(id).classList.add('hide')}
+function openFilter(){
+  $('fchips').innerHTML=PRESETS.map(([k,l])=>`<button type="button" class="${dPreset===k?'on':''}" onclick="pickPreset('${k}')">${l}</button>`).join('');
+  $('f_from').value=dFrom;$('f_to').value=dTo;openSheet('sheetF');
+}
+function pickPreset(k){const[r0,r1]=presetRange(k);dFrom=r0;dTo=r1;dPreset=k==='all'?'':k;closeSheet('sheetF');render();updateTools()}
+function applyFilter(){
+  let a=$('f_from').value,b=$('f_to').value;if(a&&b&&a>b)[a,b]=[b,a];
+  dFrom=a;dTo=b;dPreset='';closeSheet('sheetF');render();updateTools();
+}
+function clearFilter(){dFrom='';dTo='';dPreset='';closeSheet('sheetF');render();updateTools()}
+let mY=0,mM=0;
+function openSummary(){const n=new Date();mY=n.getFullYear();mM=n.getMonth()+1;renderSummary();openSheet('sheetM')}
+function monthStep(d){const n=new Date(),cy=n.getFullYear(),cm=n.getMonth()+1;let y=mY,m=mM+d;if(m<1){m=12;y--}if(m>12){m=1;y++}if(y*12+m>cy*12+cm)return;mY=y;mM=m;renderSummary()}
+function renderSummary(){
+  const n=new Date();$('m_next').disabled=mY*12+mM>=n.getFullYear()*12+n.getMonth()+1;
+  $('m_lbl').textContent=new Date(mY,mM-1,1).toLocaleDateString('en-AU',{month:'long',year:'numeric'});
+  const pre=mY+'-'+pad2(mM),rows=SECTIONS.map(s=>({s,i:0,o:0}));let ti=0,to=0;
+  entries.filter(e=>String(e.date).startsWith(pre)).forEach(e=>{const r=rows.find(x=>x.s===e.section);if(!r)return;if(e.type==='Income'){r.i+=e.amount;ti+=e.amount}else{r.o+=e.amount;to+=e.amount}});
+  const net=ti-to,sg=v=>(v>0?'+':v<0?'−':'')+fm(Math.abs(v));
+  $('m_tot').innerHTML=`<div><small>Income</small><b class="pos mv">${fm(ti)}</b></div><div><small>Expenses</small><b class="neg mv">${fm(to)}</b></div><div><small>Net</small><b class="${net>=0?'pos':'neg'} mv">${sg(net)}</b></div>`;
+  $('m_rows').innerHTML='<div class="mrow mh"><span>Fund</span><span>In</span><span>Out</span><span>Net</span></div>'+rows.map(r=>{const t=r.i-r.o;return `<div class="mrow"><span class="fn c-${r.s.toLowerCase()}">${r.s}</span><span class="mv">${fm(r.i)}</span><span class="mv">${fm(r.o)}</span><span class="mv ${t>=0?'pos':'neg'}">${sg(t)}</span></div>`}).join('');
+  const best=rows.filter(r=>r.i-r.o>0).sort((a,b)=>(b.i-b.o)-(a.i-a.o))[0];
+  $('m_best').innerHTML=best?`Best fund: <b class="c-${best.s.toLowerCase()}">${best.s}</b> <span class="mv">(+${fm(best.i-best.o)})</span>`:(ti+to?'No fund grew this month':'No entries this month');
+}
+
+/* ---------- export (CSV / PDF) ---------- */
+const csvCell=v=>{v=String(v==null?'':v);return /[",\n\r]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
+const csvText=(head,rows)=>'\ufeff'+[head].concat(rows).map(r=>r.map(csvCell).join(',')).join('\r\n');
+const stamp=()=>today();
+async function saveFile(name,mime,blob){
+  const file=new File([blob],name,{type:mime});
+  if(navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title:name});return 'shared'}catch(e){if(e&&e.name==='AbortError')return 'cancelled'}}
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},4000);return 'downloaded';
+}
+function savExportRows(){const l=savMode()?savList():entries.slice().sort((a,c)=>c.date.localeCompare(a.date)||(c.ts||0)-(a.ts||0));return l}
+function invExportRows(){return ients.slice().sort((a,c)=>c.date.localeCompare(a.date)||(c.ts||0)-(a.ts||0))}
+function openExport(){
+  const b=[];
+  if(app==='sav'){b.push(['Savings entries · CSV','savCSV'],['Savings summary · PDF','savPDF']);if(invAllowed()&&IAPI)b.push(['Investments entries · CSV','invCSV'],['Investments report · PDF','invPDF'])}
+  else{b.push(['Investments entries · CSV','invCSV'],['Investments report · PDF','invPDF'],['Savings entries · CSV','savCSV'],['Savings summary · PDF','savPDF'])}
+  $('x_btns').innerHTML=b.map(([l,k])=>`<button class="btn2" onclick="doExport('${k}')">${l}</button>`).join('');
+  const note=(app==='sav'&&savMode())?'Savings exports use what you are currently viewing (fund / search / dates).':'';
+  $('x_msg').textContent=note;$('x_msg').className='msg';openSheet('sheetX');
+}
+function xmsg(t,c){$('x_msg').textContent=t;$('x_msg').className='msg '+(c||'')}
+function loadScript(u){return new Promise((res,rej)=>{if(window.jspdf)return res();const s=document.createElement('script');s.src=u;s.onload=res;s.onerror=()=>rej(new Error('Could not load PDF tool (needs internet)'));document.head.appendChild(s)})}
+async function makePDF(title,sub,stats,head,rows,widths){
+  await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+  const doc=new window.jspdf.jsPDF({unit:'pt',format:'a4'}),W=doc.internal.pageSize.getWidth(),H=doc.internal.pageSize.getHeight(),M=40;
+  const ascii=t=>String(t==null?'':t).replace(/[\u2012-\u2015\u2212]/g,'-').replace(/[\u2018\u2019]/g,"'").replace(/[\u201c\u201d]/g,'"').replace(/[^\x20-\x7e\u00a0-\u00ff]/g,'?');
+  let y=M;doc.setFont('helvetica','bold');doc.setFontSize(18);doc.text(ascii(title),M,y);y+=20;
+  doc.setFont('helvetica','normal');doc.setFontSize(10);doc.setTextColor(90);doc.text(ascii(sub),M,y);y+=18;doc.setTextColor(0);
+  doc.setFont('helvetica','bold');doc.setFontSize(11);stats.forEach(t=>{doc.text(ascii(t),M,y);y+=15});y+=6;
+  const tw=W-2*M,sum=widths.reduce((a,b)=>a+b,0),cw=widths.map(w=>w/sum*tw);
+  const hdr=()=>{doc.setFillColor(13,42,94);doc.rect(M,y-11,tw,16,'F');doc.setTextColor(255);doc.setFont('helvetica','bold');doc.setFontSize(9);let x=M+4;head.forEach((h,i)=>{doc.text(ascii(h),x,y);x+=cw[i]});y+=16;doc.setTextColor(0)};
+  hdr();doc.setFont('helvetica','normal');doc.setFontSize(9);
+  rows.forEach((r,ri)=>{
+    if(y>H-M){doc.addPage();y=M;hdr();doc.setFont('helvetica','normal');doc.setFontSize(9)}
+    if(ri%2){doc.setFillColor(240,244,252);doc.rect(M,y-10,tw,14,'F')}
+    let x=M+4;r.forEach((c,i)=>{let t=ascii(c);const max=cw[i]-8;while(t.length>1&&doc.getTextWidth(t)>max)t=t.slice(0,-2)+'.';doc.text(t,x,y);x+=cw[i]});y+=14;
+  });
+  return doc.output('blob');
+}
+async function doExport(k){
+  try{
+    xmsg('Preparing…');
+    let r;
+    if(k==='savCSV'){const l=savExportRows();r=await saveFile('family-vault-savings-'+stamp()+'.csv','text/csv',new Blob([csvText(['Date','Fund','Type','Amount','Description'],l.map(e=>[e.date,e.section,e.type,(e.type==='Income'?'':'-')+e.amount.toFixed(2),e.desc]))],{type:'text/csv'}))}
+    else if(k==='invCSV'){const l=invExportRows();r=await saveFile('family-vault-investments-'+stamp()+'.csv','text/csv',new Blob([csvText(['Date','Project','Type','Amount','Description','Comments','Profit from'],l.map(e=>[e.date,e.section,e.type,e.amount.toFixed(2),e.desc,e.comments,e.src]))],{type:'text/csv'}))}
+    else if(k==='savPDF'){
+      const l=savExportRows();let ti=0,to=0;l.forEach(e=>e.type==='Income'?ti+=e.amount:to+=e.amount);
+      const bal=balances();const sub=(savMode()?'Filtered view':'All entries')+' - generated '+fdate(stamp());
+      const blob=await makePDF('Family Vault - Savings',sub,['Balances: '+SECTIONS.map(s=>s+' '+fm(bal[s])).join('   '),'Shown: income '+fm(ti)+'   expenses '+fm(to)+'   net '+fm(ti-to)],['Date','Fund','Type','Amount','Description'],l.map(e=>[fdate(e.date),e.section,e.type,(e.type==='Income'?'+':'-')+fm(e.amount),e.desc]),[70,70,55,70,200]);
+      r=await saveFile('family-vault-savings-'+stamp()+'.pdf','application/pdf',blob)}
+    else if(k==='invPDF'){
+      const l=invExportRows(),g=aggregate();const share=iproj.reduce((t,p)=>t+(Number(p.share)||0),0);
+      const blob=await makePDF('Family Vault - Investments','Generated '+fdate(stamp()),['Invested: A$'+fm(g.ti)+'   Share: A$'+fm(share)+'   Profit: A$'+fm(g.tp)].concat(iproj.map(p=>{const a=g.m[p.name]||{inv:0,profit:0};return shortName(p.name)+': invested '+fm(a.inv)+', profit '+fm(a.profit)})),['Date','Project','Type','Amount','Description'],l.map(e=>[fdate(e.date),shortName(e.section),e.type,fm(e.amount),e.desc||e.comments]),[65,110,75,70,170]);
+      r=await saveFile('family-vault-investments-'+stamp()+'.pdf','application/pdf',blob)}
+    xmsg(r==='cancelled'?'':(r==='downloaded'?'Downloaded ✓':'Done ✓'),r==='cancelled'?'':'ok');
+  }catch(e){xmsg('Export failed: '+(e&&e.message||'try again'),'err')}
+}
+
+/* ---------- hide amounts, Face ID lock ---------- */
+function toggleHide(){const h=document.documentElement.classList.toggle('hidamt');try{L.setItem('fv_hide',h?'1':'0')}catch(e){}updateTools()}
+const b64=a=>btoa(String.fromCharCode(...new Uint8Array(a)));
+const unb64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+const lockOn=()=>{try{return !!L.getItem('fv_cred')}catch(e){return false}};
+async function enableLock(){
+  if(!window.PublicKeyCredential||!(await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()))throw new Error('Face ID / passcode is not available here');
+  const cred=await navigator.credentials.create({publicKey:{challenge:crypto.getRandomValues(new Uint8Array(32)),rp:{name:'Family Vault',id:location.hostname},user:{id:crypto.getRandomValues(new Uint8Array(16)),name:email||'family-vault',displayName:'Family Vault'},pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required',residentKey:'discouraged'},timeout:60000,attestation:'none'}});
+  L.setItem('fv_cred',b64(cred.rawId));
+}
+async function verifyLock(){
+  await navigator.credentials.get({publicKey:{challenge:crypto.getRandomValues(new Uint8Array(32)),rpId:location.hostname,allowCredentials:[{type:'public-key',id:unb64(L.getItem('fv_cred'))}],userVerification:'required',timeout:60000}});
+}
+async function toggleLock(){
+  try{
+    if(lockOn()){await verifyLock();L.removeItem('fv_cred');showToast('Face ID lock off')}
+    else{await enableLock();showToast('Face ID lock on')}
+  }catch(e){showToast('Lock not changed: '+((e&&e.name==='NotAllowedError')?'cancelled':(e&&e.message)||'try again'))}
+  updateTools();
+}
+let unlocking=false;
+async function unlock(){
+  if(unlocking)return;unlocking=true;$('lk_msg').textContent='';
+  try{await verifyLock();document.documentElement.classList.remove('lk')}
+  catch(e){$('lk_msg').textContent=(e&&e.name==='NotAllowedError')?'Tap Unlock to try again':'Could not unlock: '+((e&&e.message)||'try again');$('lk_msg').className='msg err'}
+  unlocking=false;
+}
+let hiddenAt=0;
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden){hiddenAt=Date.now();if(lockOn())document.documentElement.classList.add('lk')}
+  else if(lockOn()&&document.documentElement.classList.contains('lk')){setTimeout(unlock,250)}
+});
+
+/* ---------- undo toast ---------- */
+let toastTimer=null,undoFn=null;
+function showToast(t,fn){clearTimeout(toastTimer);$('toast_t').textContent=t;undoFn=fn||null;$('toast_u').style.display=fn?'':'none';$('toast_u').disabled=false;$('toast').classList.remove('hide');toastTimer=setTimeout(hideToast,8000)}
+function hideToast(){$('toast').classList.add('hide');undoFn=null}
+async function doUndo(){
+  const f=undoFn;if(!f)return;undoFn=null;$('toast_u').disabled=true;$('toast_t').textContent='Undoing…';clearTimeout(toastTimer);
+  try{await f();$('toast_t').textContent='Undone ✓'}catch(e){$('toast_t').textContent='Could not undo: '+((e&&e.message)||'try again')}
+  $('toast_u').style.display='none';toastTimer=setTimeout(hideToast,2500);
+}
+
+/* ---------- new investment project ---------- */
+function openProject(){if(role!=='owner')return;['p_name','p_label','p_share'].forEach(i=>$(i).value='');$('p_msg').textContent='';openSheet('sheetP')}
+async function saveProject(){
+  const pm=(t,c)=>{$('p_msg').textContent=t;$('p_msg').className='msg '+(c||'')};
+  const nm=$('p_name').value.trim().replace(/[()]/g,''),lb=$('p_label').value.trim().replace(/[()]/g,''),share=Math.round(parseFloat($('p_share').value||'0')*100)/100;
+  if(!nm)return pm('Enter a project name','err');
+  if(!(share>=0))return pm('Share value must be 0 or more','err');
+  const full=lb?nm+' ('+lb+')':nm;
+  if(iproj.some(p=>p.name.toLowerCase()===full.toLowerCase()||shortName(p.name).toLowerCase()===nm.toLowerCase()))return pm('A project with that name already exists','err');
+  $('p_save').disabled=true;pm('Saving…');
+  try{
+    await tok();
+    await iapi('/values/'+enc(STAB+'!A:C')+':append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS',{method:'POST',body:JSON.stringify({values:[[full,share,nowStamp()]]})});
+    await fetchInv();closeSheet('sheetP');showToast('Project added');
+  }catch(e){pm('Could not save: '+((e&&e.message)||'try again'),'err')}
+  $('p_save').disabled=false;
+}
 
 /* ---------- investments (forms) ---------- */
 function buildSeg(id,cb){const el=$(id);el.innerHTML=ITYPES.map(([v,l])=>`<button type="button" data-v="${v}">${l}</button>`).join('');el.querySelectorAll('button').forEach(b=>b.onclick=()=>cb(b.dataset.v))}
@@ -387,7 +693,8 @@ function saveI(){
   if(!date)return imsg('Pick a date','err');
   if(itype==='Reinvested Profit'&&!src)return imsg('Choose which project the profit is from','err');
   $('isave').disabled=true;imsg('Saving…');
-  Promise.resolve(istore.add({section,type:itype,amount,date,src,desc:$('i_desc').value.trim(),comments:$('i_com').value.trim()})).then(()=>{
+  Promise.resolve(istore.add({section,type:itype,amount,date,src,desc:$('i_desc').value.trim(),comments:$('i_com').value.trim()})).then(nid=>{
+    showToast('Entry added',nid?()=>istore.del(nid):null);
     $('i_amount').value='';$('i_desc').value='';$('i_com').value='';$('i_proj').value='';$('i_src').value='';$('isave').disabled=false;imsg('Saved ✓','ok');
     setTimeout(()=>{imsg('');tab(1)},500);
   }).catch(e=>{$('isave').disabled=false;imsg('Could not save: '+(e&&e.message||'try again'),'err')});
@@ -409,13 +716,15 @@ function saveIEdit(){
   if(!date)return iemsg('Pick a date','err');
   if(ietype==='Reinvested Profit'&&!src)return iemsg('Choose which project the profit is from','err');
   $('ie_save').disabled=true;iemsg('Saving…');
+  const oid=ieId,o0=ients.find(x=>x.id===oid);
   Promise.resolve(istore.edit(ieId,{section,type:ietype,amount,date,src,desc:$('ie_desc').value.trim(),comments:$('ie_com').value.trim()}))
-    .then(()=>{$('ie_save').disabled=false;closeIEdit()})
+    .then(()=>{$('ie_save').disabled=false;closeIEdit();if(o0)showToast('Entry updated',()=>istore.edit(oid,{section:o0.section,type:o0.type,amount:o0.amount,date:o0.date,src:o0.src,desc:o0.desc,comments:o0.comments}))})
     .catch(e=>{$('ie_save').disabled=false;iemsg('Could not save: '+(e&&e.message||'try again'),'err')});
 }
 function delIEdit(){
   if(!confirm('Delete this entry?'))return;
-  Promise.resolve(istore.del(ieId)).then(closeIEdit).catch(e=>iemsg('Could not delete: '+(e&&e.message||'try again'),'err'));
+  const o0=ients.find(x=>x.id===ieId);
+  Promise.resolve(istore.del(ieId)).then(()=>{closeIEdit();if(o0)showToast('Entry deleted',()=>istore.add({id:o0.id,section:o0.section,type:o0.type,amount:o0.amount,date:o0.date,src:o0.src,desc:o0.desc,comments:o0.comments}))}).catch(e=>iemsg('Could not delete: '+(e&&e.message||'try again'),'err'));
 }
 
 /* ---------- storage: Google Sheets API (OAuth via Google Identity Services) ---------- */
@@ -479,7 +788,7 @@ store={
   add:async e=>{await tok();
     const n=FIRST+(await readRows()).length;
     await api('/values/'+enc('Entries!A'+n+':F'+n)+'?valueInputOption=USER_ENTERED',{method:'PUT',body:JSON.stringify({values:[[e.date,e.person,e.section,e.type,e.amount,e.desc]]})});
-    await fetchEntries()},
+    await fetchEntries();return String(n)},
   edit:async(id,e)=>{await tok();
     const old=entries.find(x=>x.id===id);if(!old)return;
     const rows=await readRows(),r=rows[old.row-FIRST]||[];
@@ -524,9 +833,10 @@ async function findRow(id){
 const nowStamp=()=>{const d=new Date(),p=n=>String(n).padStart(2,'0');return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds())};
 istore={
   add:async e=>{await tok();
-    const row=[crypto.randomUUID(),e.date,e.section,e.desc,e.comments,e.amount,nowStamp(),e.type,e.type==='Reinvested Profit'?e.src:''];
+    const nid=(e.id&&!/^r\d+$/.test(e.id))?e.id:crypto.randomUUID();
+    const row=[nid,e.date,e.section,e.desc,e.comments,e.amount,nowStamp(),e.type,e.type==='Reinvested Profit'?e.src:''];
     await iapi('/values/'+enc(ITAB+'!A:I')+':append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS',{method:'POST',body:JSON.stringify({values:[row]})});
-    await fetchInv()},
+    await fetchInv();return nid},
   edit:async(id,e)=>{await tok();
     const n=await findRow(id);
     await iapi('/values/'+enc(ITAB+'!B'+n+':I'+n)+'?valueInputOption=USER_ENTERED',{method:'PUT',body:JSON.stringify({values:[[e.date,e.section,e.desc,e.comments,e.amount,nowStamp(),e.type,e.type==='Reinvested Profit'?e.src:'']]})});
@@ -546,7 +856,7 @@ function setStale(k,on,text){stale[k]=on;syncText[k]=on?(text||''):'';updateSync
 const invAllowed=()=>role==='owner'||(role==='viewer'&&VSI);
 function setBadges(){$('pSM').classList.toggle('on',role==='owner');$('pDM').classList.toggle('on',role==='viewer')}
 function applyRole(){
-  setBadges();
+  setBadges();updateTools();
   $('mode').className='';$('mode').onclick=null;
   $('mode').textContent=role==='owner'?'':'View only';
   $('t2').classList.toggle('hide',role!=='owner');
@@ -567,7 +877,7 @@ function autoSync(){
 }
 function armSync(){
   if(armed)return;armed=true;
-  const h=()=>{if(token){off();return}off();autoSync()};
+  const h=()=>{if(document.documentElement.classList.contains('lk'))return;if(token){off();return}off();autoSync()};
   const off=()=>{armed=false;['click','touchend'].forEach(t=>document.removeEventListener(t,h,true))};
   ['click','touchend'].forEach(t=>document.addEventListener(t,h,true));
 }
@@ -620,7 +930,9 @@ function setLevel(i){
 }
 function fitHist(){
   const F=$('funds');if(F.classList.contains('hide'))return;
-  const h=$('hist'),f=$('fl'),cur=app==='sav'?filter:ifilter;
+  const cd=$('cards');cd.style.maxHeight='';cd.style.overflowY='';
+  {const room=window.innerHeight-reserve()-(cd.getBoundingClientRect().top+window.scrollY)-36-150;if(cd.scrollHeight>room&&room>0){cd.style.maxHeight=Math.max(room,120)+'px';cd.style.overflowY='auto'}}
+  const h=$('hist'),f=$('fl'),cur=app==='sav'?savMode():ifilter;
   h.style.height='';h.style.maxHeight='';
   const avail=()=>window.innerHeight-reserve()-(h.getBoundingClientRect().top+window.scrollY);
   if(!cur){
@@ -666,6 +978,10 @@ window.addEventListener('load',()=>setTimeout(fitLayout,100));
 ['fl'].forEach(i=>{const e=document.getElementById(i);if(e)e.addEventListener('load',fitLayout)});
 
 function init(){
+  $('sq').addEventListener('input',e=>{q=e.target.value;render()});
+  $('sq').addEventListener('keydown',e=>{if(e.key==='Enter')e.target.blur()});
+  updateTools();
+  if(lockOn()&&document.documentElement.classList.contains('lk'))setTimeout(unlock,400);
   SECTIONS.forEach(s=>{$('section').add(new Option(s,s));$('e_section').add(new Option(s,s))});
   buildSeg('ntype',setIType);buildSeg('etype',setIEType);setIType('Investment');setIEType('Investment');
   fillProj();
