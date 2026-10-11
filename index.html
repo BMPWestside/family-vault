@@ -139,6 +139,7 @@ input,select,.seg button{background:rgba(255,255,255,.07)}
 .card.orange,.e.orange{background:rgba(235,120,30,.30);color:#ffd0a0;border-color:#ff9a40}.e.orange small{color:inherit;opacity:.75}.e.orange .inc{color:#8dffa6}.e.orange .exp{color:#ff9d9d}.c-orange{color:#ffd0a0}
 .card.lime,.e.lime{background:rgba(140,190,30,.30);color:#e0f59a;border-color:#b7e04a}.e.lime small{color:inherit;opacity:.75}.e.lime .inc{color:#8dffa6}.e.lime .exp{color:#ff9d9d}.c-lime{color:#e0f59a}
 .c-violet{color:#dcc2ff}
+#cards .card{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 /* ---------- tools, sheets, toast ---------- */
 #hrow{display:flex;align-items:center;gap:6px;margin:8px 4px 6px}
 #hrow h3{margin:0;flex:1;min-width:0}
@@ -346,6 +347,7 @@ html.hidamt .sumbar i::after{font-size:min(12.5px,3.2vw)}
     <div class="ph"><b>New section</b><span></span></div>
     <label>Section name</label><input id="s_name" placeholder="e.g. Holiday" maxlength="30">
     <button class="save" id="s_save" onclick="saveSection()">Add section</button>
+    <button class="btn2 danger hide" id="s_del" onclick="delSection()">Delete section</button>
     <button class="btn2" onclick="closeSheet('sheetS')">Cancel</button>
     <div class="msg" id="s_msg"></div>
   </div>
@@ -361,6 +363,7 @@ html.hidamt .sumbar i::after{font-size:min(12.5px,3.2vw)}
       <div><label>Share value (AUD)</label><input id="p_share" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00"></div>
     </div>
     <button class="save" id="p_save" onclick="saveProject()">Add project</button>
+    <button class="btn2 danger hide" id="p_del" onclick="delProject()">Delete project</button>
     <button class="btn2" onclick="closeSheet('sheetP')">Cancel</button>
     <div class="msg" id="p_msg"></div>
   </div>
@@ -374,13 +377,14 @@ html.hidamt .sumbar i::after{font-size:min(12.5px,3.2vw)}
 <script>
 const BASE=['Gold','Savings','Emergency','Travel'],XCLS=['violet','teal','pink','orange','lime'];
 let SECTIONS=BASE.slice(),extraSecs=[];
-try{extraSecs=JSON.parse(localStorage.getItem('st_secs')||'[]')}catch(e){}
+let delSecs=[];
+try{const c=JSON.parse(localStorage.getItem('st_secs')||'[]');if(Array.isArray(c))extraSecs=c;else{extraSecs=c.x||[];delSecs=c.d||[]}}catch(e){}
 function rebuildSections(){
-  const have=new Set(BASE.map(x=>x.toLowerCase())),out=BASE.slice();
+  const gone=new Set(delSecs.map(x=>x.toLowerCase())),base=BASE.filter(x=>!gone.has(x.toLowerCase())),have=new Set(base.map(x=>x.toLowerCase())),out=base.slice();
   extraSecs.concat(entries.map(e=>e.section)).forEach(n=>{n=String(n||'').trim();if(n&&!have.has(n.toLowerCase())){have.add(n.toLowerCase());out.push(n)}});
   SECTIONS=out;
 }
-function secCls(n){const i=SECTIONS.indexOf(n);if(i<0)return 'violet';return i<BASE.length?BASE[i].toLowerCase():XCLS[(i-BASE.length)%XCLS.length]}
+function secCls(n){const b=BASE.find(x=>x.toLowerCase()===String(n).toLowerCase());if(b)return b.toLowerCase();const i=SECTIONS.filter(x=>!BASE.some(y=>y.toLowerCase()===x.toLowerCase())).indexOf(n);return XCLS[(i<0?0:i)%XCLS.length]}
 function fillSections(){
   [['section','Choose section'],['e_section','']].forEach(([id,ph])=>{
     const el=$(id);if(!el)return;const v=el.value;el.innerHTML='';
@@ -419,13 +423,14 @@ function setApp(a){
   app=a;
   $('m1').classList.toggle('on',a==='sav');$('m2').classList.toggle('on',a==='inv');
   $('t1').textContent=a==='sav'?'Stack':'Build';if(!$('sq').classList.contains('hide'))closeSearch();updateTools();$('sb').classList.toggle('hide',a!=='inv');
-  updateSync();render();tab(1);
+  $('cards').scrollTop=0;updateSync();render();tab(1);
 }
 function setType(t){type=t;$('bi').className=t==='Income'?'on':'';$('bx').className=t==='Expense'?'on x':''}
 
 /* ---------- savings ---------- */
 function balances(){const b={};SECTIONS.forEach(s=>b[s]=0);entries.forEach(e=>{if(e.section in b)b[e.section]+=e.type==='Income'?e.amount:-e.amount});return b}
-function render(){app==='sav'?renderSav():renderInv()}
+function render(){const c=$('cards'),st=c.scrollTop;app==='sav'?renderSav():renderInv();c.scrollTop=st;
+  const sl=c.querySelector('.card.sel');if(sl){const cr=c.getBoundingClientRect(),r=sl.getBoundingClientRect();if(r.top<cr.top)c.scrollTop+=r.top-cr.top-4;else if(r.bottom>cr.bottom)c.scrollTop+=r.bottom-cr.bottom+4}}
 function renderSav(){
   const b=balances();
   $('cards').innerHTML=SECTIONS.map(s=>`<button class="card ${secCls(s)} ${filter===s?'sel':''}" onclick="toggle(this.dataset.s)" data-s="${esc(s)}"><span>${s}</span><span class="amt">${money(b[s])}</span></button>`).join('');
@@ -643,6 +648,26 @@ async function doExport(k){
 function toggleHide(){document.documentElement.classList.toggle('hidamt')}
 document.addEventListener('visibilitychange',()=>{if(document.hidden)document.documentElement.classList.add('hidamt')});
 
+
+/* ---------- long-press a section/project card to edit or delete ---------- */
+(function(){
+  let t=null,sx=0,sy=0,fired=0;
+  const cards=document.getElementById('cards');
+  const cancel=()=>{clearTimeout(t);t=null};
+  const start=e=>{
+    if(role!=='owner')return;const b=e.target.closest&&e.target.closest('.card');if(!b)return;
+    const p=e.touches?e.touches[0]:e;sx=p.clientX;sy=p.clientY;cancel();
+    t=setTimeout(()=>{t=null;fired=Date.now();try{navigator.vibrate&&navigator.vibrate(15)}catch(x){}
+      if(app==='sav')openSection(b.dataset.s);else{const i=[...cards.querySelectorAll('.card')].indexOf(b);if(iproj[i])openProject(iproj[i].name)}},550);
+  };
+  const move=e=>{if(!t)return;const p=e.touches?e.touches[0]:e;if(Math.abs(p.clientX-sx)>8||Math.abs(p.clientY-sy)>8)cancel()};
+  cards.addEventListener('touchstart',start,{passive:true});cards.addEventListener('touchmove',move,{passive:true});
+  ['touchend','touchcancel','scroll'].forEach(n=>cards.addEventListener(n,cancel,{passive:true}));
+  cards.addEventListener('mousedown',start);cards.addEventListener('mousemove',move);cards.addEventListener('mouseup',cancel);cards.addEventListener('mouseleave',cancel);
+  cards.addEventListener('click',e=>{if(Date.now()-fired<600){e.stopPropagation();e.preventDefault();fired=0}},true);
+  cards.addEventListener('contextmenu',e=>{if(e.target.closest('.card'))e.preventDefault()});
+})();
+
 /* ---------- undo toast ---------- */
 let toastTimer=null,undoFn=null;
 function showToast(t,fn){clearTimeout(toastTimer);$('toast_t').textContent=t;undoFn=fn||null;$('toast_u').style.display=fn?'':'none';$('toast_u').disabled=false;$('toast').classList.remove('hide');toastTimer=setTimeout(hideToast,8000)}
@@ -654,43 +679,118 @@ async function doUndo(){
 }
 
 /* ---------- new savings section ---------- */
-function openSection(){if(role!=='owner')return;$('s_name').value='';$('s_msg').textContent='';openSheet('sheetS')}
+let secEdit=null;
+function openSection(old){if(role!=='owner')return;secEdit=typeof old==='string'?old:null;
+  $('s_name').value=secEdit||'';$('s_msg').textContent='';
+  document.querySelector('#sheetS .ph b').textContent=secEdit?'Edit section':'New section';
+  $('s_save').textContent=secEdit?'Save changes':'Add section';$('s_del').classList.toggle('hide',!secEdit);openSheet('sheetS')}
+async function secEnsure(){
+  const m=await api('?fields=sheets.properties');
+  if(!m.sheets.some(x=>x.properties.title==='Sections')){
+    await api(':batchUpdate',{method:'POST',body:JSON.stringify({requests:[{addSheet:{properties:{title:'Sections'}}}]})});
+    await api('/values/'+enc('Sections!A1:C1')+'?valueInputOption=USER_ENTERED',{method:'PUT',body:JSON.stringify({values:[['Section','Created','Status']]})});
+  }
+  return m;
+}
+const secLog=(n,st)=>api('/values/'+enc('Sections!A:C')+':append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS',{method:'POST',body:JSON.stringify({values:[[n,nowStamp(),st||'']]})});
+async function secRows(old){
+  const rows=await readRows(),aff=entries.filter(e=>e.section===old);
+  for(const e of aff){const r=rows[e.row-FIRST]||[];if(String(r[2]||'').trim()!==old||Number(r[4])!==e.amount){await fetchEntries();throw new Error('Sheet changed, reloaded. Try again')}}
+  return aff;
+}
 async function saveSection(){
   const sm=(t,c)=>{$('s_msg').textContent=t;$('s_msg').className='msg '+(c||'')};
   const nm=$('s_name').value.trim().replace(/['"<>&\\]/g,'');
   if(!nm)return sm('Enter a section name','err');
-  if(SECTIONS.some(x=>x.toLowerCase()===nm.toLowerCase()))return sm('That section already exists','err');
+  if(secEdit&&nm===secEdit){closeSheet('sheetS');return}
+  if(SECTIONS.some(x=>x.toLowerCase()===nm.toLowerCase()&&(!secEdit||x!==secEdit)))return sm('That section already exists','err');
   $('s_save').disabled=true;sm('Saving…');
   try{
-    await tok();
-    const m=await api('?fields=sheets.properties');
-    if(!m.sheets.some(x=>x.properties.title==='Sections')){
-      await api(':batchUpdate',{method:'POST',body:JSON.stringify({requests:[{addSheet:{properties:{title:'Sections'}}}]})});
-      await api('/values/'+enc('Sections!A1:B1')+'?valueInputOption=USER_ENTERED',{method:'PUT',body:JSON.stringify({values:[['Section','Created']]})});
+    await tok();await secEnsure();
+    if(secEdit){
+      const old=secEdit,aff=await secRows(old);
+      await secLog(nm,'');
+      if(aff.length)await api('/values:batchUpdate',{method:'POST',body:JSON.stringify({valueInputOption:'USER_ENTERED',data:aff.map(e=>({range:'Entries!C'+e.row,values:[[nm]]}))})});
+      await secLog(old,'deleted');
+      if(filter===old)filter=nm;
+      await fetchEntries();closeSheet('sheetS');showToast('Section renamed');
+    }else{
+      await secLog(nm,'');await fetchEntries();closeSheet('sheetS');showToast('Section added');
     }
-    await api('/values/'+enc('Sections!A:B')+':append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS',{method:'POST',body:JSON.stringify({values:[[nm,nowStamp()]]})});
-    await fetchEntries();closeSheet('sheetS');showToast('Section added');try{$('section').value=nm}catch(e){}
   }catch(e){sm('Could not save: '+((e&&e.message)||'try again'),'err')}
   $('s_save').disabled=false;
+}
+async function delSection(){
+  const old=secEdit;if(!old)return;const sm=(t,c)=>{$('s_msg').textContent=t;$('s_msg').className='msg '+(c||'')};
+  const n=entries.filter(e=>e.section===old).length;
+  if(!confirm(n?'Delete "'+old+'" and its '+n+' entr'+(n>1?'ies':'y')+'? This cannot be undone.':'Delete "'+old+'"?'))return;
+  $('s_del').disabled=true;sm('Deleting…');
+  try{
+    await tok();const m=await secEnsure();const aff=await secRows(old);
+    if(aff.length){const sid=m.sheets.find(x=>x.properties.title==='Entries').properties.sheetId;
+      await api(':batchUpdate',{method:'POST',body:JSON.stringify({requests:aff.map(e=>e.row).sort((a,b)=>b-a).map(r=>({deleteDimension:{range:{sheetId:sid,dimension:'ROWS',startIndex:r-1,endIndex:r}}}))})})}
+    await secLog(old,'deleted');if(filter===old)filter=null;
+    await fetchEntries();closeSheet('sheetS');showToast('Section deleted');
+  }catch(e){sm('Could not delete: '+((e&&e.message)||'try again'),'err')}
+  $('s_del').disabled=false;
 }
 
 /* ---------- new investment project ---------- */
 function onProjPick(){const el=$('i_proj');if(el.value==='__new__'){el.value='';openProject()}}
-function openProject(){if(role!=='owner')return;['p_name','p_label','p_share'].forEach(i=>$(i).value='');$('p_msg').textContent='';openSheet('sheetP')}
+let projEdit=null;
+function openProject(old){if(role!=='owner')return;projEdit=typeof old==='string'?old:null;
+  const p=projEdit&&iproj.find(x=>x.name===projEdit);
+  $('p_name').value=p?shortName(p.name):'';$('p_label').value=p?bracket(p.name):'';$('p_share').value=p?(Number(p.share)||''):'';$('p_msg').textContent='';
+  document.querySelector('#sheetP .ph b').textContent=projEdit?'Edit project':'New project';
+  $('p_save').textContent=projEdit?'Save changes':'Add project';$('p_del').classList.toggle('hide',!projEdit);openSheet('sheetP')}
+async function projData(old){
+  const [er,sr]=await Promise.all([iapi('/values/'+enc(ITAB+'!A2:I')),iapi('/values/'+enc(STAB+'!A2:C')).catch(()=>({values:[]}))]);
+  const ev=er.values||[],sv=sr.values||[];
+  return {erows:ev.map((r,i)=>({row:i+2,sec:String(r[2]||'').trim(),src:String(r[8]||'').trim()})).filter(x=>x.sec===old||x.src===old),
+          srow:(()=>{const i=sv.findIndex(r=>String(r[0]||'').trim()===old);return i<0?0:i+2})()};
+}
 async function saveProject(){
   const pm=(t,c)=>{$('p_msg').textContent=t;$('p_msg').className='msg '+(c||'')};
   const nm=$('p_name').value.trim().replace(/[()]/g,''),lb=$('p_label').value.trim().replace(/[()]/g,''),share=Math.round(parseFloat($('p_share').value||'0')*100)/100;
   if(!nm)return pm('Enter a project name','err');
   if(!(share>=0))return pm('Share value must be 0 or more','err');
   const full=lb?nm+' ('+lb+')':nm;
-  if(iproj.some(p=>p.name.toLowerCase()===full.toLowerCase()||shortName(p.name).toLowerCase()===nm.toLowerCase()))return pm('A project with that name already exists','err');
+  if(iproj.some(p=>p.name!==projEdit&&(p.name.toLowerCase()===full.toLowerCase()||shortName(p.name).toLowerCase()===nm.toLowerCase())))return pm('A project with that name already exists','err');
   $('p_save').disabled=true;pm('Saving…');
   try{
     await tok();
-    await iapi('/values/'+enc(STAB+'!A:C')+':append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS',{method:'POST',body:JSON.stringify({values:[[full,share,nowStamp()]]})});
-    await fetchInv();closeSheet('sheetP');showToast('Project added');try{$('i_proj').value=full}catch(e){}
+    if(projEdit){
+      const old=projEdit,d=await projData(old);
+      if(d.srow)await iapi('/values/'+enc(STAB+'!A'+d.srow+':B'+d.srow)+'?valueInputOption=USER_ENTERED',{method:'PUT',body:JSON.stringify({values:[[full,share]]})});
+      else await iapi('/values/'+enc(STAB+'!A:C')+':append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS',{method:'POST',body:JSON.stringify({values:[[full,share,nowStamp()]]})});
+      const data=[];d.erows.forEach(x=>{if(x.sec===old)data.push({range:ITAB+'!C'+x.row,values:[[full]]});if(x.src===old)data.push({range:ITAB+'!I'+x.row,values:[[full]]})});
+      if(data.length)await iapi('/values:batchUpdate',{method:'POST',body:JSON.stringify({valueInputOption:'USER_ENTERED',data})});
+      if(ifilter===old)ifilter=full;
+      await fetchInv();closeSheet('sheetP');showToast('Project updated');
+    }else{
+      await iapi('/values/'+enc(STAB+'!A:C')+':append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS',{method:'POST',body:JSON.stringify({values:[[full,share,nowStamp()]]})});
+      await fetchInv();closeSheet('sheetP');showToast('Project added');
+    }
   }catch(e){pm('Could not save: '+((e&&e.message)||'try again'),'err')}
   $('p_save').disabled=false;
+}
+async function delProject(){
+  const old=projEdit;if(!old)return;const pm=(t,c)=>{$('p_msg').textContent=t;$('p_msg').className='msg '+(c||'')};
+  const n=ients.filter(e=>e.section===old).length;
+  if(!confirm(n?'Delete "'+shortName(old)+'" and its '+n+' entr'+(n>1?'ies':'y')+'? This cannot be undone.':'Delete "'+shortName(old)+'"?'))return;
+  $('p_del').disabled=true;pm('Deleting…');
+  try{
+    await tok();const d=await projData(old);
+    const m=await iapi('?fields=sheets.properties');
+    const eid=m.sheets.find(x=>x.properties.title===ITAB).properties.sheetId,sid=(m.sheets.find(x=>x.properties.title===STAB)||{properties:{}}).properties.sheetId;
+    const del=(id,r)=>({deleteDimension:{range:{sheetId:id,dimension:'ROWS',startIndex:r-1,endIndex:r}}});
+    const reqs=d.erows.filter(x=>x.sec===old).map(x=>x.row).sort((a,b)=>b-a).map(r=>del(eid,r));
+    if(d.srow&&sid!=null)reqs.push(del(sid,d.srow));
+    if(reqs.length)await iapi(':batchUpdate',{method:'POST',body:JSON.stringify({requests:reqs})});
+    if(ifilter===old)ifilter=null;
+    await fetchInv();closeSheet('sheetP');showToast('Project deleted');
+  }catch(e){pm('Could not delete: '+((e&&e.message)||'try again'),'err')}
+  $('p_del').disabled=false;
 }
 
 /* ---------- investments (forms) ---------- */
@@ -803,7 +903,7 @@ async function fetchEntries(){
     if(!section||!type||!(amount>=0))return;
     entries.push({id:String(FIRST+i),row:FIRST+i,date:toISO(r[0]),person:String(r[1]||''),section,type,amount,desc:String(r[5]||''),ts:FIRST+i});
   });
-  try{const d=await api('/values/'+enc('Sections!A2:A'));extraSecs=(d.values||[]).map(r=>String(r[0]||'').trim()).filter(Boolean);L.setItem('st_secs',JSON.stringify(extraSecs))}catch(x){if(/expired/i.test(x.message))throw x}
+  try{const d=await api('/values/'+enc('Sections!A2:C'));const m=new Map();(d.values||[]).forEach(r=>{const n=String(r[0]||'').trim();if(n)m.set(n.toLowerCase(),{n,del:String(r[2]||'').trim().toLowerCase()==='deleted'})});const v=[...m.values()];extraSecs=v.filter(x=>!x.del).map(x=>x.n);delSecs=v.filter(x=>x.del).map(x=>x.n);L.setItem('st_secs',JSON.stringify({x:extraSecs,d:delSecs}))}catch(x){if(/expired/i.test(x.message))throw x}
   L.setItem('st_cache',JSON.stringify(entries));rebuildSections();fillSections();setStale('sav',false);render();
 }
 store={
