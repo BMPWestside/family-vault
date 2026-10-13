@@ -1055,10 +1055,10 @@ function setLevel(i){
 function fitHist(){
   const F=$('funds');if(F.classList.contains('hide'))return;
   const cd=$('cards');cd.style.maxHeight='';cd.style.overflowY='';
-  {const room=window.innerHeight-reserve()-(cd.getBoundingClientRect().top+window.scrollY)-36-150;if(cd.scrollHeight>room&&room>0){cd.style.maxHeight=Math.max(room,120)+'px';cd.style.overflowY='auto'}}
+  {const room=VH()-reserve()-(cd.getBoundingClientRect().top+window.scrollY)-36-150;if(cd.scrollHeight>room&&room>0){cd.style.maxHeight=Math.max(room,120)+'px';cd.style.overflowY='auto'}}
   const h=$('hist'),f=$('fl'),cur=app==='sav'?savMode():ifilter;
   h.style.height='';h.style.maxHeight='';
-  const avail=()=>window.innerHeight-reserve()-(h.getBoundingClientRect().top+window.scrollY);
+  const avail=()=>VH()-reserve()-(h.getBoundingClientRect().top+window.scrollY);
   if(!cur){
     h.classList.add('logomode');f.style.display='';f.style.height='40px';
     let i=0;setLevel(0);
@@ -1091,13 +1091,17 @@ function fitLogo(){
   if(g){
     g.style.display='';g.style.height='130px';
     const top=g.getBoundingClientRect().top+window.scrollY;
-    const size=Math.min(130,window.innerHeight-reserve()-top-6);
+    const size=Math.min(130,VH()-reserve()-top-6);
     if(size<44)g.style.display='none';else g.style.height=size+'px';
   }
 }
 function fitLayout(){fitHist();fitLogo()}
-window.addEventListener('resize',fitLayout);
-window.addEventListener('orientationchange',()=>setTimeout(fitLayout,200));
+let baseH=0;
+const typing=()=>{const a=document.activeElement;return !!(a&&/^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName))};
+function VH(){if(!baseH||!typing())baseH=window.innerHeight;return baseH}
+window.addEventListener('resize',()=>{if(!typing())fitLayout()});
+document.addEventListener('focusout',()=>setTimeout(()=>{if(!typing())fitLayout()},350));
+window.addEventListener('orientationchange',()=>setTimeout(()=>{baseH=0;fitLayout()},300));
 window.addEventListener('load',()=>setTimeout(fitLayout,100));
 ['fl'].forEach(i=>{const e=document.getElementById(i);if(e)e.addEventListener('load',fitLayout)});
 
