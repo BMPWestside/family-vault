@@ -180,6 +180,7 @@ html.lk .lockov{display:flex}
 .toast.hide{display:none}
 .toast button{padding:7px 16px;border-radius:999px;border:0;background:linear-gradient(135deg,#e2c586,var(--gold));color:var(--cobalt);font-weight:900;font-size:14px}
 .pb .ey1,.pb .ey2{display:none;width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.pb.lockable{cursor:pointer}
 .pb.eye{opacity:1;cursor:pointer;background:rgba(255,255,255,.07);color:var(--gold2)}
 .pb.eye .tx{display:none}.pb.eye .ey1{display:block}
 html.hidamt .pb.eye{background:rgba(31,166,224,.35);color:#fff;box-shadow:0 0 5px rgba(31,166,224,.85)}
@@ -345,6 +346,16 @@ html.hidamt .sumbar i::after{font-size:min(12.5px,3.2vw)}
     <div id="x_btns"></div>
     <div class="msg" id="x_msg"></div>
     <button class="btn2" onclick="closeSheet('sheetX')">Close</button>
+  </div>
+</div>
+
+<div id="sheetL" class="sheet hide">
+  <div class="sheet-bg" onclick="closeSheet('sheetL')"></div>
+  <div class="panel sheet-box">
+    <div class="ph"><b>Face ID lock</b><span></span></div>
+    <p id="l_txt" style="margin:0 6px 12px;color:var(--muted)"></p>
+    <button class="save" id="l_go" onclick="lockSheetGo()"></button>
+    <button class="btn2" onclick="closeSheet('sheetL')">Cancel</button>
   </div>
 </div>
 
@@ -571,7 +582,8 @@ const savList=()=>entries.filter(e=>(!filter||e.section===filter)&&(!dFrom||e.da
 function updateTools(){
   const sav=app==='sav';
   ['tb_s','tb_f','tb_m'].forEach(id=>$(id).classList.toggle('hide',!sav));
-  $('tb_l').classList.toggle('hide',!window.PublicKeyCredential);
+  $('tb_l').classList.toggle('hide',!window.PublicKeyCredential||role==='viewer');
+  $('pDM').classList.toggle('lockable',role==='viewer'&&!!window.PublicKeyCredential);
   $('tb_l').classList.toggle('on',lockOn());
   $('tb_f').classList.toggle('on',dActive());
 }
@@ -682,6 +694,10 @@ async function toggleLock(){
   }catch(e){showToast('Lock not changed: '+((e&&e.name==='NotAllowedError')?'cancelled':(e&&e.message)||'try again'))}
   updateTools();
 }
+function openLockSheet(){const on=lockOn();
+  $('l_txt').textContent=on?'The lock is on for this phone. Face ID is asked when you open the app.':'Ask for Face ID whenever you open the app on this phone.';
+  $('l_go').textContent=on?'Deactivate lock':'Activate lock';openSheet('sheetL')}
+async function lockSheetGo(){closeSheet('sheetL');await toggleLock()}
 let unlocking=false;
 async function unlock(){
   if(unlocking)return;unlocking=true;$('lk_msg').textContent='';
@@ -1028,7 +1044,7 @@ function updateSync(){const e=$('sync');if(!e)return;e.textContent=syncText[app]
 function setStale(k,on,text){stale[k]=on;syncText[k]=on?(text||''):'';updateSync()}
 const invAllowed=()=>role==='owner'||(role==='viewer'&&VSI);
 function setBadges(){const o=role==='owner',v=role==='viewer';$('pSM').classList.toggle('on',o);$('pDM').classList.toggle('on',v);$('pDM').classList.toggle('eye',o);$('pSM').classList.toggle('eye',v)}
-document.querySelector('header').addEventListener('click',e=>{if(e.target.closest('.pb.eye'))toggleHide()});
+document.querySelector('header').addEventListener('click',e=>{if(e.target.closest('.pb.eye'))toggleHide();else if(e.target.closest('#pDM')&&role==='viewer'&&window.PublicKeyCredential)openLockSheet()});
 function applyRole(){
   setBadges();fillSections();fillProj();updateTools();
   $('mode').className='';$('mode').onclick=null;
