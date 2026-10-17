@@ -225,7 +225,6 @@ html.hidamt .sumbar i::after{font-size:min(12.5px,3.2vw)}
       <button id="tb_s" onclick="openSearch()" aria-label="Search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></button>
       <button id="tb_f" onclick="openFilter()" aria-label="Filter by date"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></button>
       <button id="tb_m" onclick="openSummary()" aria-label="Monthly summary"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V10M12 20V4M19 20v-7"/></svg></button>
-      <button id="tb_l" class="hide" onclick="toggleLock()" aria-label="Face ID lock"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8V6a2 2 0 012-2h2M16 4h2a2 2 0 012 2v2M20 16v2a2 2 0 01-2 2h-2M8 20H6a2 2 0 01-2-2v-2M9 10v1.5M15 10v1.5M12 10v3.5h-1M9 16c1.6 1.4 4.4 1.4 6 0"/></svg></button>
       <button id="tb_x" onclick="openExport()" aria-label="Export"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg></button>
     </div>
   </div>
@@ -582,9 +581,7 @@ const savList=()=>entries.filter(e=>(!filter||e.section===filter)&&(!dFrom||e.da
 function updateTools(){
   const sav=app==='sav';
   ['tb_s','tb_f','tb_m'].forEach(id=>$(id).classList.toggle('hide',!sav));
-  $('tb_l').classList.toggle('hide',!window.PublicKeyCredential||role==='viewer');
-  $('pDM').classList.toggle('lockable',role==='viewer'&&!!window.PublicKeyCredential);
-  $('tb_l').classList.toggle('on',lockOn());
+  const lk=!!window.PublicKeyCredential;$('pSM').classList.toggle('lockable',role==='owner'&&lk);$('pDM').classList.toggle('lockable',role==='viewer'&&lk);
   $('tb_f').classList.toggle('on',dActive());
 }
 function openSearch(){$('hrow').classList.add('searching');$('sq').classList.remove('hide');$('sqx').classList.remove('hide');$('sq').focus()}
@@ -1044,7 +1041,7 @@ function updateSync(){const e=$('sync');if(!e)return;e.textContent=syncText[app]
 function setStale(k,on,text){stale[k]=on;syncText[k]=on?(text||''):'';updateSync()}
 const invAllowed=()=>role==='owner'||(role==='viewer'&&VSI);
 function setBadges(){const o=role==='owner',v=role==='viewer';$('pSM').classList.toggle('on',o);$('pDM').classList.toggle('on',v);$('pDM').classList.toggle('eye',o);$('pSM').classList.toggle('eye',v)}
-document.querySelector('header').addEventListener('click',e=>{if(e.target.closest('.pb.eye'))toggleHide();else if(e.target.closest('#pDM')&&role==='viewer'&&window.PublicKeyCredential)openLockSheet()});
+document.querySelector('header').addEventListener('click',e=>{if(e.target.closest('.pb.eye'))toggleHide();else if(e.target.closest('.pb.lockable'))openLockSheet()});
 function applyRole(){
   setBadges();fillSections();fillProj();updateTools();
   $('mode').className='';$('mode').onclick=null;
